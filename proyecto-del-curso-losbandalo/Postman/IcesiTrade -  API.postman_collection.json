@@ -1,0 +1,1843 @@
+{
+	"info": {
+		"_postman_id": "c551ee09-1492-4221-996b-14e7e48fc703",
+		"name": "IcesiTrade -  API",
+		"description": "Tesitos",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44853341",
+		"_collection_link": "https://cloudy-satellite-1091020.postman.co/workspace/Oscar-Mu%C3%B1oz's-Workspace~6f0fecca-03b5-4510-87bf-d7fbbe92bd3d/collection/44853341-c551ee09-1492-4221-996b-14e7e48fc703?action=share&source=collection_link&creator=44853341"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"jwt\", jsonData.token);",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.execution.setNextRequest(\"Create User\");",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"juan.perez@example.com\",\n  \"password\": \"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"ID fue generado\", function () {\r",
+									"    pm.expect(json.id).to.not.be.undefined;\r",
+									"    pm.expect(json.id).to.be.a(\"number\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"El email corresponde al aleatorio\", function () {\r",
+									"    const expectedEmail = pm.environment.get(\"randomEmail\");\r",
+									"    pm.expect(json.email).to.eql(expectedEmail);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Nombre y teléfono están presentes\", function () {\r",
+									"    pm.expect(json.name).to.eql(\"Juan Nuevo\");\r",
+									"    pm.expect(json.phone).to.eql(\"3123456789\");\r",
+									"});\r",
+									"\r",
+									"// Encadenar al siguiente request automáticamente\r",
+									"pm.execution.setNextRequest(\"Get All Users\");\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const randomEmail = `user${Math.floor(Math.random() * 100000)}@mail.com`;\r",
+									"pm.environment.set(\"randomEmail\", randomEmail);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{randomEmail}}\",\n  \"password\": \"123456\",\n  \"confirmPassword\": \"123456\",\n  \"name\": \"Juan Nuevo\",\n  \"phone\": \"3123456789\"\n}\n"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Respuesta es un arreglo\", function () {\r",
+									"    const json = pm.response.json();\r",
+									"    pm.expect(json).to.be.an(\"array\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"El arreglo tiene al menos un usuario\", function () {\r",
+									"    const json = pm.response.json();\r",
+									"    pm.expect(json.length).to.be.greaterThan(0);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"El ID del usuario es correcto\", function () {\r",
+									"    pm.expect(json.id).to.eql(1);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"El email es correcto\", function () {\r",
+									"    pm.expect(json.email).to.eql(\"juan.perez@example.com\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"El teléfono es correcto\", function () {\r",
+									"    pm.expect(json.phone).to.eql(\"3001234567\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"La contraseña está presente\", function () {\r",
+									"    pm.expect(json.password).to.be.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Update User\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/id/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"id",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"// Parsear respuesta\r",
+									"const json = pm.response.json();\r",
+									"\r",
+									"// Validar que el ID es el esperado\r",
+									"pm.test(\"ID del usuario actualizado es correcto\", function () {\r",
+									"    pm.expect(json.id).to.eql(2);\r",
+									"});\r",
+									"\r",
+									"// Validar campos actualizados\r",
+									"pm.test(\"Email actualizado correctamente\", function () {\r",
+									"    pm.expect(json.email).to.eql(\"actualizado@usuario.com\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Nombre actualizado correctamente\", function () {\r",
+									"    pm.expect(json.name).to.eql(\"Juan Actualizado\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Teléfono actualizado correctamente\", function () {\r",
+									"    pm.expect(json.phone).to.eql(\"3000000000\");\r",
+									"});\r",
+									"\r",
+									"// Opcional: validación genérica de que el campo password existe (aunque no deberías recibir el texto plano)\r",
+									"pm.test(\"Campo contraseña presente\", function () {\r",
+									"    pm.expect(json.password).to.be.a(\"string\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\":2,\n  \"email\": \"actualizado@usuario.com\",\n  \"name\": \"Juan Actualizado\",\n  \"phone\": \"3000000000\",\n  \"password\": \"nuevaClave\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "Create Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"const json = pm.response.json();\r",
+									"\r",
+									"\r",
+									"pm.test(\"Nombre de categoría es correcto\", function () {\r",
+									"    pm.expect(json.name).to.eql(\"Juegos de mesas 2\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Descripción de categoría es correcta\", function () {\r",
+									"    pm.expect(json.description).to.eql(\"Todo tipo de juegos de tablero y estrategia\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Juegos de mesas 2\", \"description\": \"Todo tipo de juegos de tablero y estrategia\"}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Código de estado 200 OK\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"La respuesta es un arreglo\", function () {\r",
+									"    pm.expect(json).to.be.an(\"array\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Hay al menos una categoría\", function () {\r",
+									"    pm.expect(json.length).to.be.greaterThan(0);\r",
+									"});\r",
+									"\r",
+									"// Validar estructura de un elemento del arreglo\r",
+									"pm.test(\"La categoría tiene campos esperados\", function () {\r",
+									"    const first = json[0];\r",
+									"    pm.expect(first).to.have.property(\"id\");\r",
+									"    pm.expect(first).to.have.property(\"name\");\r",
+									"    pm.expect(first).to.have.property(\"description\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Existe la categoría 'Estrategia'\", function () {\r",
+									"    const existe = json.some(c => c.name === \"Estrategia\");\r",
+									"    pm.expect(existe).to.be.true;\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code es 200 o 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"ID de categoría es correcto\", function () {\r",
+									"    pm.expect(json.id).to.eql(3);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Nombre de categoría es correcto\", function () {\r",
+									"    pm.expect(json.name).to.eql(\"Juegos Estratégicos\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Descripción de categoría es correcta\", function () {\r",
+									"    pm.expect(json.description).to.eql(\"Categoría actualizada\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"ID de categoría es correcto\", function () {\r",
+									"    pm.expect(json.id).to.eql(4);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Nombre de categoría es correcto\", function () {\r",
+									"    pm.expect(json.name).to.eql(\"Material Art\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Descripción de categoría es correcta\", function () {\r",
+									"    pm.expect(json.description).to.eql(\"Roles creativos\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"name\": \"Material Art\", \"description\": \"Roles creativos\"}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/4",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Favorite Product",
+			"item": [
+				{
+					"name": "Add Favorite Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/1/4",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites",
+								"1",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorite Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Favorite found\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Favorite has correct structure and data\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.have.property(\"userId\", 3);\r",
+									"    pm.expect(jsonData).to.have.property(\"productId\", 5);\r",
+									"    pm.expect(jsonData).to.have.property(\"createdAt\");\r",
+									"\r",
+									"    // Validación básica de timestamp ISO\r",
+									"    pm.expect(jsonData.createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T/);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/3/5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites",
+								"3",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List All Favorites by User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Favorites fetched\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an array with expected structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.be.an(\"array\");\r",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);\r",
+									"\r",
+									"    jsonData.forEach(fav => {\r",
+									"        pm.expect(fav).to.have.property(\"id\");\r",
+									"        pm.expect(fav).to.have.property(\"userId\", 3);\r",
+									"        pm.expect(fav).to.have.property(\"productId\");\r",
+									"        pm.expect(fav).to.have.property(\"createdAt\");\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/user/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites",
+								"user",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Incluye todos los endpoints encargados de la gestión de productos favoritos por parte de los usuarios. Permite agregar un producto a favoritos, listar los favoritos de un usuario, obtener un favorito por ID y eliminar favoritos. Esta funcionalidad mejora la experiencia del usuario al permitirle guardar productos de interés para revisarlos o comprarlos más adelante."
+		},
+		{
+			"name": "Sales",
+			"item": [
+				{
+					"name": "Create Sales",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"buyerId\": 1,\r\n  \"productId\": 9\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sales",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Sale",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Sales fetched\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/sales",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sale by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Sale found\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/sales/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sales",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Sale",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Sale updated\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"buyerId\": 1,\r\n  \"productId\": 3\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sales/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sale by User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Sales fetched\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/sales/buyer/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sales",
+								"buyer",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Contiene todos los endpoints relacionados con el registro y la consulta de ventas dentro de la plataforma. Permite crear nuevas ventas, actualizar detalles, obtener ventas por ID o por usuario, eliminar registros y listar todas las ventas realizadas. Esta carpeta es clave para simular el flujo de compra-venta y realizar pruebas sobre el historial de transacciones de los usuarios."
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"POST /products - Validación del contenido creado\", () => {\r",
+									"    const p = pm.response.json();\r",
+									"    pm.environment.set(\"created_product_id\", p.id); // Guarda el ID para futuros tests\r",
+									"    pm.expect(p.title).to.eql(\"Parques\");\r",
+									"    pm.expect(p.status).to.eql(\"Disponible\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Parques\",\r\n  \"description\": \"Juego de estrategia y comercio para 3-4 jugadores.\",\r\n  \"status\": \"Disponible\",\r\n  \"price\": 120000,\r\n  \"location\": \"Cali\",\r\n  \"isSold\": false,\r\n  \"categoryId\": 1,\r\n  \"sellerId\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Products fetched\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an array with valid product structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.be.an(\"array\");\r",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);\r",
+									"\r",
+									"    jsonData.forEach(product => {\r",
+									"        pm.expect(product).to.have.property(\"id\");\r",
+									"        pm.expect(product).to.have.property(\"title\");\r",
+									"        pm.expect(product).to.have.property(\"description\");\r",
+									"        pm.expect(product).to.have.property(\"status\");\r",
+									"        pm.expect(product).to.have.property(\"price\");\r",
+									"        pm.expect(product).to.have.property(\"location\");\r",
+									"        pm.expect(product).to.have.property(\"isSold\");\r",
+									"        pm.expect(product).to.have.property(\"categoryId\");\r",
+									"        pm.expect(product).to.have.property(\"sellerId\");\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Product updated\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": 1,\r\n  \"title\": \"Catan actualizado\",\r\n  \"description\": \"Edición revisada del clásico de estrategia.\",\r\n  \"status\": \"Disponible\",\r\n  \"price\": 110000,\r\n  \"location\": \"Palmira\",\r\n  \"isSold\": false,\r\n  \"categoryId\": 1,\r\n  \"sellerId\": 2\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Product found\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Contiene todos los endpoints relacionados con la gestión de productos en la plataforma. Incluye operaciones para crear, obtener, actualizar, eliminar y listar productos. Estos endpoints permiten a los usuarios publicar artículos en venta, ver los detalles de productos disponibles, modificar información y administrar su inventario. Es fundamental para el funcionamiento del marketplace."
+		},
+		{
+			"name": "Review",
+			"item": [
+				{
+					"name": "Create Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200]);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"GET /reviews/8 - Validación de datos\", () => {\r",
+									"    const r = pm.response.json();\r",
+									"    pm.expect(r.rating).to.eql(5);\r",
+									"    pm.expect(r.comment).to.eql(\"Increible\");\r",
+									"    pm.expect(r.productId).to.eql(2);\r",
+									"    pm.expect(r.reviewerId).to.eql(2);\r",
+									"    pm.expect(r.revieweeId).to.eql(3);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"rating\": 5,\r\n  \"comment\": \"Increible\",\r\n  \"productId\": 2,\r\n  \"reviewerId\": 2,\r\n  \"revieweeId\": 3\r\n}\r\n\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Review updated\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"rating\": 4,\r\n  \"comment\": \"Muy bueno\",\r\n  \"productId\": 1,\r\n  \"reviewerId\": 2,\r\n  \"revieweeId\": 3\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Review by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"GET /reviews/2 - Status 200 OK\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"GET /reviews/2 - Contenido correcto\", () => {\r",
+									"    const r = pm.response.json();\r",
+									"    pm.expect(r.rating).to.eql(4);\r",
+									"    pm.expect(r.comment).to.eql(\"Muy bueno\");\r",
+									"    pm.expect(r.productId).to.eql(1);\r",
+									"    pm.expect(r.reviewerId).to.eql(2);\r",
+									"    pm.expect(r.revieweeId).to.eql(3);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200 - Reviews fetched\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an array of reviews with expected fields\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonData).to.be.an(\"array\");\r",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);\r",
+									"\r",
+									"    jsonData.forEach(review => {\r",
+									"        pm.expect(review).to.have.property(\"id\");\r",
+									"        pm.expect(review).to.have.property(\"rating\");\r",
+									"        pm.expect(review).to.have.property(\"comment\");\r",
+									"        pm.expect(review).to.have.property(\"productId\");\r",
+									"        pm.expect(review).to.have.property(\"reviewerId\");\r",
+									"        pm.expect(review).to.have.property(\"revieweeId\");\r",
+									"        pm.expect(review).to.have.property(\"createdAt\");\r",
+									"    });\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Agrupa todos los endpoints relacionados con las reseñas de productos y usuarios dentro de la plataforma. Esta carpeta incluye operaciones para crear, obtener, actualizar y eliminar reviews, así como listar todas las reseñas disponibles. Permite validar que los usuarios puedan evaluar productos y a otros usuarios con un sistema de puntuación y comentarios, fomentando la confianza en las transacciones."
+		},
+		{
+			"name": "Message",
+			"item": [
+				{
+					"name": "Create Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado correcto (201 o 200)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validate message content\", function () {\r",
+									"    var json = pm.response.json();\r",
+									"    pm.expect(json.content).to.eql(\"De unaaa\");\r",
+									"    pm.expect(json.senderId).to.eql(2);\r",
+									"    pm.expect(json.receiverId).to.eql(1);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"content\": \"De unaaa\",\r\n  \"senderId\": 2,\r\n  \"receiverId\": 1\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"messages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Review by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validate message fields\", function () {\r",
+									"    const json = pm.response.json();\r",
+									"    pm.expect(json.content).to.eql(\"Hola, ¿estás interesado en el producto?\");\r",
+									"    pm.expect(json.senderId).to.eql(1);\r",
+									"    pm.expect(json.receiverId).to.eql(2);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/messages/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Should contain 1 or more messages\", function () {\r",
+									"    const messages = pm.response.json();\r",
+									"    pm.expect(messages.length).to.be.at.least(1);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify specific message contents\", function () {\r",
+									"    const messages = pm.response.json();\r",
+									"\r",
+									"    const msg3 = messages.find(m => m.id === 3);\r",
+									"    pm.expect(msg3.content).to.include(\"Clarooooo\");\r",
+									"\r",
+									"    const msg4 = messages.find(m => m.id === 4);\r",
+									"    pm.expect(msg4.content).to.eql(\"Epaaaa?\");\r",
+									"\r",
+									"    const msg5 = messages.find(m => m.id === 5);\r",
+									"    pm.expect(msg5.senderId).to.eql(2);\r",
+									"    pm.expect(msg5.receiverId).to.eql(1);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"messages"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Contiene todos los endpoints relacionados con el sistema de mensajería entre usuarios dentro de la plataforma. Aquí se agrupan las solicitudes para enviar mensajes, listar conversaciones, obtener mensajes por conversación, actualizar y eliminar mensajes. Estos endpoints permiten simular la funcionalidad de chat o comunicación directa entre compradores y vendedores.EndFragment"
+		},
+		{
+			"name": "Deletes",
+			"item": [
+				{
+					"name": "Remove Favorite Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Remove succefully Favorite products\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/1/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites",
+								"1",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Remove succefully User\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/13",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"13"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Remove succefully category\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"15"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Sale",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Remove succefully sale\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/sales/13",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sales",
+								"13"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Remove succefully products\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/products/20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"20"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Remove succefully reviews\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/12",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								"12"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Remove succefully messages\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/messages/21",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"21"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "categoryId",
+			"value": ""
+		},
+		{
+			"key": "saleId",
+			"value": ""
+		}
+	]
+}

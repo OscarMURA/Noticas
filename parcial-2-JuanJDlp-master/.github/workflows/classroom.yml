@@ -1,0 +1,29 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Parcial 2
+      id: test-parcial-2
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test Parcial 2
+        setup-command: ''
+        command: mvn clean test
+        timeout: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-PARCIAL-2_RESULTS: "${{steps.test-parcial-2.outputs.result}}"
+      with:
+        runners: test-parcial-2
